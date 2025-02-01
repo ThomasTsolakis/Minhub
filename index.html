@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MinHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #222;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            text-align: center;
+            color: white;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="MinHub Logo" class="logo">
+    </div>
+    <div class="video-list" id="video-list"></div>
+
+    <!-- Age Verification Modal -->
+    <div id="ageModal" class="modal">
+        <div class="modal-content">
+            <h2>Are you 18 years or older?</h2>
+            <button id="yesButton" class="modal-button">Yes</button>
+            <button id="noButton" class="modal-button">No, I am not</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            document.getElementById("ageModal").style.display = "block";
+        };
+
+        document.getElementById("yesButton").onclick = function() {
+            loadVideos();
+            document.getElementById("ageModal").style.display = "none";
+        };
+
+        document.getElementById("noButton").onclick = function() {
+            window.location.href = "https://www.google.com";
+        };
+
+        function loadVideos() {
+            fetch("videos/")
+                .then(response => response.text())
+                .then(text => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, "text/html");
+                    const links = [...doc.querySelectorAll("a")].map(a => a.href).filter(href => href.endsWith(".mp4"));
+                    const videoList = document.getElementById("video-list");
+                    videoList.innerHTML = "";
+
+                    links.forEach(video => {
+                        const videoName = decodeURIComponent(video.split("/").pop().replace(".mp4", ""));
+                        const videoCard = document.createElement("div");
+                        videoCard.classList.add("video-card");
+                        videoCard.onclick = () => window.location.href = `video.html?src=${video}`;
+
+                        const thumbnail = document.createElement("video");
+                        thumbnail.src = video;
+                        thumbnail.currentTime = 2;
+                        thumbnail.muted = true;
+                        thumbnail.style.width = "100%";
+                        thumbnail.style.borderRadius = "10px";
+
+                        const titleText = document.createElement("p");
+                        titleText.textContent = videoName;
+
+                        videoCard.appendChild(thumbnail);
+                        videoCard.appendChild(titleText);
+                        videoList.appendChild(videoCard);
+                    });
+                });
+        }
+    </script>
+</body>
+</html>
